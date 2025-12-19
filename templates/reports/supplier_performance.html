@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supplier Performance Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    .performance-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .badge-excellent { background-color: #1cc88a; color: white; }
+    .badge-good { background-color: #36b9cc; color: white; }
+    .badge-average { background-color: #f6c23e; color: white; }
+    .badge-poor { background-color: #e74a3b; color: white; }
+    .supplier-card {
+        transition: all 0.3s;
+        border-left: 4px solid #4e73df;
+    }
+    .supplier-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">{{ report_title }}</h1>
+            <p class="text-muted">Supplier delivery times, quality ratings, and performance metrics</p>
+        </div>
+    </div>
+
+    <!-- Supplier Performance Cards -->
+    <div class="row">
+        {% for data in supplier_data %}
+        <div class="col-lg-6 mb-4">
+            <div class="card supplier-card shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">{{ data.supplier.name }}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">Total Orders</small>
+                                <h5 class="mb-0">{{ data.total_orders }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">Total Spent</small>
+                                <h5 class="mb-0">${{ data.total_spent|floatformat:2 }}</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">On-Time Delivery</small>
+                                <h5 class="mb-0">
+                                    {{ data.on_time_delivery_rate|floatformat:1 }}%
+                                    {% if data.on_time_delivery_rate >= 90 %}
+                                        <span class="performance-badge badge-excellent">Excellent</span>
+                                    {% elif data.on_time_delivery_rate >= 75 %}
+                                        <span class="performance-badge badge-good">Good</span>
+                                    {% elif data.on_time_delivery_rate >= 50 %}
+                                        <span class="performance-badge badge-average">Average</span>
+                                    {% else %}
+                                        <span class="performance-badge badge-poor">Poor</span>
+                                    {% endif %}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">Avg Delivery Days</small>
+                                <h5 class="mb-0">{{ data.average_delivery_days|floatformat:0 }} days</h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">Quality Rating</small>
+                                <h5 class="mb-0">
+                                    {{ data.quality_rating|floatformat:1 }}/5.0
+                                    <div class="text-warning">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= data.quality_rating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="border-bottom pb-2 mb-2">
+                                <small class="text-muted">Contact</small>
+                                <p class="mb-0 small">
+                                    {% if data.supplier.contact_email %}
+                                        <i class="fas fa-envelope"></i> {{ data.supplier.contact_email }}<br>
+                                    {% endif %}
+                                    {% if data.supplier.contact_phone %}
+                                        <i class="fas fa-phone"></i> {{ data.supplier.contact_phone }}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No supplier performance data available.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

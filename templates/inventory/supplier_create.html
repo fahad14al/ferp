@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static crispy_forms_tags %}
+
+{% block title %}Add Supplier - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Add New Supplier</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">Suppliers</a></li>
+                        <li class="breadcrumb-item active">Add Supplier</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Suppliers
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-plus"></i> Supplier Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Supplier
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-info-circle"></i> Help</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Required Fields</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Supplier Name</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Optional Fields</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-info text-info"></i> Contact Email</li>
+                                <li><i class="fas fa-info text-info"></i> Contact Phone</li>
+                                <li><i class="fas fa-info text-info"></i> Contact Person</li>
+                                <li><i class="fas fa-info text-info"></i> Address</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>Tip:</strong> Adding contact information and address details will help you manage supplier relationships more effectively.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format phone number
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.querySelector('input[name="contact_phone"]');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 10) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})/, '($1) $2-');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})/, '($1) ');
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
+{% endblock %}

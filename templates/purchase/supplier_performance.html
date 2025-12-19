@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Supplier Performance - ERP System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-star"></i> Supplier Performance Metrics
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Supplier</th>
+                                    <th>Total Orders</th>
+                                    <th>On-Time Delivery</th>
+                                    <th>Quality Rating</th>
+                                    <th>Avg Delivery Days</th>
+                                    <th>Total Spent</th>
+                                    <th>Avg Order Value</th>
+                                    <th>Performance Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for performance in performances %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ performance.supplier.name }}</strong><br>
+                                        <small class="text-muted">{{ performance.supplier.contact_person }}</small>
+                                    </td>
+                                    <td>{{ performance.total_orders }}</td>
+                                    <td>
+                                        <span class="badge {% if performance.on_time_delivery_rate >= 90 %}badge-success{% elif performance.on_time_delivery_rate >= 75 %}badge-warning{% else %}badge-danger{% endif %}">
+                                            {{ performance.on_time_delivery_rate|floatformat:1 }}%
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="width: 100px;">
+                                            <div class="progress-bar {% if performance.quality_rating >= 4 %}bg-success{% elif performance.quality_rating >= 3 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                 style="width: {{ performance.quality_rating|mul:20 }}%">
+                                                {{ performance.quality_rating }}/5
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ performance.average_delivery_days|floatformat:1 }} days</td>
+                                    <td>{{ performance.total_spent|floatformat:2 }}</td>
+                                    <td>{% if performance.total_orders %}{{ performance.average_order_value|floatformat:2 }}{% else %}0.00{% endif %}</td>
+                                    <td>
+                                        {% with score=performance.on_time_delivery_rate|add:performance.quality_rating|mul:20 %}
+                                        <span class="badge {% if score >= 90 %}badge-success{% elif score >= 75 %}badge-warning{% else %}badge-danger{% endif %}">
+                                            {{ score|floatformat:1 }}%
+                                        </span>
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">
+                                        No supplier performance data available
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Insights -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Performance Insights</h5>
+                </div>
+                <div class="card-body">
+                    {% if performances %}
+                        {% with top_supplier=performances.0 %}
+                        <div class="alert alert-success">
+                            <strong>Top Performer:</strong> {{ top_supplier.supplier.name }}
+                            <br>On-time delivery: {{ top_supplier.on_time_delivery_rate|floatformat:1 }}%
+                            <br>Quality rating: {{ top_supplier.quality_rating }}/5
+                        </div>
+                        {% endwith %}
+
+                        {% for performance in performances %}
+                            {% if performance.on_time_delivery_rate < 80 %}
+                            <div class="alert alert-warning">
+                                <strong>Attention needed:</strong> {{ performance.supplier.name }}
+                                has low on-time delivery rate ({{ performance.on_time_delivery_rate|floatformat:1 }}%)
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            No performance data available yet. Performance metrics will be calculated as purchase orders are processed.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Performance Trends</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="performanceChart" width="400" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Performance chart
+    const performanceData = {
+        labels: [
+            {% for performance in performances %}
+            '{{ performance.supplier.name }}',
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'On-Time Delivery Rate',
+            data: [
+                {% for performance in performances %}
+                {{ performance.on_time_delivery_rate }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+        }, {
+            label: 'Quality Rating (x20)',
+            data: [
+                {% for performance in performances %}
+                {{ performance.quality_rating|mul:20 }},
+                {% endfor %}
+            ],
+            backgroundColor: 'rgba(255, 99, 132, 0.8)',
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+        }]
+    };
+
+    const performanceChart = new Chart(
+        document.getElementById('performanceChart'),
+        {
+            type: 'bar',
+            data: performanceData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        }
+    );
+});
+</script>
+{% endblock %}

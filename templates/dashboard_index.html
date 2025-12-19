@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Dashboard</h1>
+
+    <div class="row mt-4">
+        <!-- Inventory Metrics -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Products</h5>
+                    <h2 class="text-primary">{{ total_products }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Low Stock Items</h5>
+                    <h2 class="text-warning">{{ low_stock_products }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Suppliers</h5>
+                    <h2 class="text-info">{{ total_suppliers }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Metrics -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Sales Orders</h5>
+                    <h2 class="text-success">{{ total_sales_orders }}</h2>
+                    <small class="text-muted">Pending: {{ pending_sales_orders }}</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Purchase Metrics -->
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Purchase Orders</h5>
+                    <h2 class="text-primary">{{ total_purchase_orders }}</h2>
+                    <small class="text-muted">Pending: {{ pending_purchase_orders }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Sales Revenue</h5>
+                    <h2 class="text-success">{{ total_sales_revenue|floatformat:0 }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Purchase Value</h5>
+                    <h2 class="text-info">{{ total_purchase_value|floatformat:0 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'inventory:product_create' %}" class="btn btn-outline-primary">Add Product</a>
+                        <a href="{% url 'inventory:supplier_create' %}" class="btn btn-outline-info">Add Supplier</a>
+                        <a href="{% url 'sales:sales_order_create' %}" class="btn btn-outline-success">Create Sales Order</a>
+                        <a href="{% url 'purchase:purchase_order_create' %}" class="btn btn-outline-warning">Create Purchase Order</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Activity feed coming soon...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

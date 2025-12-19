@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Supplier - {{ supplier.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Delete Supplier</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">Suppliers</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_detail' supplier.pk %}">{{ supplier.name }}</a></li>
+                        <li class="breadcrumb-item active">Delete</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Supplier
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirm Supplier Deletion</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Warning: This action cannot be undone!</h6>
+                        <p>You are about to delete the supplier "<strong>{{ supplier.name }}</strong>".</p>
+                    </div>
+
+                    <div class="supplier-info mb-4">
+                        <h6>Supplier Details:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <td><strong>Name:</strong></td>
+                                        <td>{{ supplier.name }}</td>
+                                    </tr>
+                                    {% if supplier.contact_email %}
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td>{{ supplier.contact_email }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% if supplier.contact_phone %}
+                                    <tr>
+                                        <td><strong>Phone:</strong></td>
+                                        <td>{{ supplier.contact_phone }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="supplier-stats">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <div class="stat-number">{{ supplier.product_set.count }}</div>
+                                            <div class="stat-label">Products</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-number">{{ supplier.product_set.aggregate|length }}</div>
+                                            <div class="stat-label">Total Value</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if supplier.product_set.exists %}
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-info-circle"></i> Impact on Products</h6>
+                        <p>This supplier is associated with <strong>{{ supplier.product_set.count }}</strong> product(s). When you delete this supplier:</p>
+                        <ul class="mb-0">
+                            <li>The supplier field will be cleared for all associated products</li>
+                            <li>Products will remain in the inventory but without supplier information</li>
+                            <li>You can reassign suppliers to these products later</li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Yes, Delete Supplier
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

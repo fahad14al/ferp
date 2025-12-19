@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Point of Sale{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pos.css' %}">
+<style>
+/* CSS Reused from previous version, somewhat simplified since we don't need Modal styles for receipt anymore */
+.pos-container { display: flex; gap: 20px; padding: 20px; height: calc(100vh - 100px); }
+.catalog { flex: 2; overflow-y: auto; padding-right: 10px; }
+.cart { flex: 1; background: #fff; padding: 20px; border-radius: 8px; display: flex; flex-direction: column; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+.products { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+.product { background: #fff; border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; }
+.prod-top { margin-bottom: 10px; }
+.thumb { height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #aaa; margin-bottom: 10px; border-radius: 4px; }
+.price { font-weight: bold; color: #2c3e50; }
+.add-row { display: flex; gap: 5px; }
+.qty-input { width: 60px; padding: 4px; border: 1px solid #ced4da; border-radius: 4px; }
+.btn-add { background: #007bff; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; flex: 1; }
+.btn-add:hover { background: #0056b3; }
+
+.cart-items { flex: 1; overflow-y: auto; margin: 15px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f8f9fa; }
+.cart-item-info { flex: 1; }
+.cart-item-total { font-weight: bold; margin: 0 10px; }
+.btn-remove { background: #dc3545; color: white; border: none; padding: 2px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+
+.totals .row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+.totals .big { font-size: 1.2em; font-weight: bold; color: #2c3e50; }
+
+.checkout-form { margin-top: 15px; }
+.form-group { margin-bottom: 10px; }
+.form-control { width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; }
+.payment-methods { display: flex; gap: 10px; margin-bottom: 15px; }
+.payment-label { flex: 1; text-align: center; border: 1px solid #dee2e6; padding: 10px; border-radius: 4px; cursor: pointer; }
+.payment-radio:checked + .payment-label { background: #007bff; color: white; border-color: #007bff; }
+.payment-radio { display: none; }
+
+.btn-checkout { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 1.1em; cursor: pointer; }
+.btn-checkout:disabled { background: #ccc; cursor: not-allowed; }
+.btn-clear { background: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Point of Sale</h1>
+            <div>
+                <a href="{% url 'sales:sales_order_list' %}" class="btn btn-secondary">Back to Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pos-container">
+    <main class="catalog">
+            <!-- Barcode Scanner Form -->
+            <div class="options-container" style="margin-bottom: 20px;">
+                <form method="POST" action="{% url 'sales:pos' %}" style="flex: 1; padding: 15px; border: 2px solid #0d6efd; border-radius: 8px; background: #f0f7ff;">
+                    {% csrf_token %}
+                    <h6 style="color: #0d6efd; margin-bottom: 8px;"><i class="fas fa-barcode"></i> Scan Barcode</h6>
+                    <input type="hidden" name="scan_barcode" value="true">
+                    <input name="barcode" class="form-control mb-1" placeholder="Scan barcode..." style="font-weight: bold;" autofocus />
+                    <small class="text-muted" style="font-size: 0.8em;">Press Enter to add item</small>
+                </form>
+            </div>
+
+            <div class="products" id="productGrid" style="gap: 15px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">
+                {% for product in products %}
+                <div class="product" style="padding: 0; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; aspect-ratio: 1 / 1; display: flex; flex-direction: column; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s;">
+                    
+                    <!-- Image Section (Top 60%) -->
+                    <div style="height: 60%; width: 100%; position: relative; background: #f8f9fa;">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100 text-secondary" style="font-size: 2rem; font-weight: bold;">
+                                {{ product.name|slice:":1"|upper }}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Floating Stock Badge -->
+                        <span class="badge bg-dark bg-opacity-75" style="position: absolute; top: 8px; right: 8px; font-size: 0.7rem; font-weight: normal;">
+                            {{ product.stock_quantity }}
+                        </span>
+                    </div>
+                    
+                    <!-- Info Section (Bottom 40%) -->
+                    <div style="height: 40%; padding: 8px 10px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="text-truncate fw-bold text-dark" style="font-size: 0.9em; max-width: 100%; line-height: 1.2;" title="{{ product.name }}">{{ product.name }}</div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-end mt-1">
+                            <div class="fw-bold text-primary" style="font-size: 1.1em; line-height: 1;">{{ product.price }}</div>
+                            
+                            <!-- Add Button (Compact) -->
+                            <form method="POST" action="{% url 'sales:pos' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="add_product" value="true">
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn btn-sm btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; padding: 0;">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No products found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <aside class="cart">
+        <h3>Shopping Cart</h3>
+        
+        <div class="cart-items">
+            {% if cart_items %}
+                {% for item in cart_items %}
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <div>{{ item.name }}</div>
+                        <small class="text-muted">{{ item.quantity }} x {{ item.price }}</small>
+                    </div>
+                    <div class="cart-item-total">
+                        {{ item.line_total|floatformat:2 }}
+                    </div>
+                    
+                    <!-- Remove Item Form -->
+                    <form method="POST" action="{% url 'sales:pos' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="remove_item" value="true">
+                        <input type="hidden" name="product_id" value="{{ item.id }}">
+                        <button type="submit" class="btn-remove">X</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">Cart is empty</div>
+            {% endif %}
+        </div>
+
+        <div class="totals">
+            <div class="row"><div>Subtotal</div><div>{{ subtotal|floatformat:2 }}</div></div>
+            <div class="row"><div>Tax ({{ tax_percent|floatformat:0 }}%)</div><div>{{ tax_amount|floatformat:2 }}</div></div>
+            <div class="row"><div class="big">Total</div><div class="big">{{ total_amount|floatformat:2 }}</div></div>
+        </div>
+
+        {% if cart_items %}
+        <div style="margin-top: 10px; border-top: 1px solid #ccc; padding-top: 10px;">
+            <form method="POST" action="{% url 'sales:pos' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input name="customer_phone" class="form-control" placeholder="Customer Phone (Optional)">
+                </div>
+                <div class="form-group">
+                    <input name="customer_name" class="form-control" placeholder="Customer Name (Optional)">
+                </div>
+                 <div class="form-group">
+                    <input name="customer_address" class="form-control" placeholder="Customer Address (Optional)">
+                </div>
+
+                <div class="payment-methods">
+                    <label style="flex:1;">
+                        <input type="radio" name="payment_method" value="cash" checked class="payment-radio">
+                        <div class="payment-label">Cash</div>
+                    </label>
+                    <label style="flex:1;">
+                        <input type="radio" name="payment_method" value="card" class="payment-radio">
+                        <div class="payment-label">Card</div>
+                    </label>
+                    <label style="flex:1;">
+                        <input type="radio" name="payment_method" value="digital" class="payment-radio">
+                        <div class="payment-label">Digital</div>
+                    </label>
+                </div>
+
+                <div class="d-flex">
+                    <button type="submit" name="clear_cart" value="true" class="btn-clear">Clear</button>
+                    <button type="submit" name="complete_sale" value="true" class="btn-checkout">Complete Sale</button>
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </aside>
+</div>
+{% endblock %}

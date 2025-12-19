@@ -1,0 +1,119 @@
+/* POS STYLES */
+.pos-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* ROOT & GLOBAL */
+:root{
+  --bg:#f4f6f9; --card:#ffffff; --accent:#1f6feb; --muted:#65748b; --danger:#e03131;
+  --radius:12px;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+}
+*{box-sizing:border-box}
+body{margin:0; background:linear-gradient(180deg,var(--bg),#eef2f7); color:#0f1724}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:20px}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#2dd4bf);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+.title{font-size:18px;font-weight:700}
+.subtitle{font-size:13px;color:var(--muted)}
+
+/* LAYOUT */
+main{display:grid;grid-template-columns:1fr 380px;gap:22px;padding:20px}
+
+/* BUTTONS */
+.btn{background:var(--accent);color:white;padding:9px 12px;border-radius:10px;border:none;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(31,111,235,0.12)}
+.btn.clear{background:transparent;color:var(--danger);border:1px solid rgba(224,49,49,0.08)}
+
+/* CATALOG */
+.catalog{padding:18px;background:var(--card);border-radius:var(--radius);box-shadow:0 6px 18px rgba(18,38,63,0.06)}
+.controls{display:flex;gap:10px;margin-bottom:14px}
+.search{flex:1}
+.search input{width:100%;padding:10px;border-radius:10px;border:1px solid #e6eaef;background:#fbfdff}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+
+.product{background:#fff;padding:12px;border-radius:12px;border:1px solid rgba(16,24,40,0.04);display:flex;flex-direction:column;gap:10px}
+.prod-top{display:flex;gap:12px;align-items:center}
+.thumb{width:56px;height:56px;border-radius:8px;background:#eef3ff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.name{font-weight:600}
+.price{font-weight:700;color:var(--accent)}
+.add-row{display:flex;gap:8px;margin-top:auto}
+.qty{width:72px;padding:8px;border-radius:8px;border:1px solid #eef2f7}
+
+/* CART */
+.cart{padding:18px;background:#fff;border-radius:var(--radius);box-shadow:0 6px 18px rgba(18,38,63,0.06)}
+.cart-items{max-height:56vh;overflow:auto;margin-bottom:12px}
+.cart-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;border:1px dashed rgba(15,23,36,0.03);margin-bottom:8px}
+.ci-thumb{width:48px;height:48px;border-radius:8px;background:#f7faff;display:flex;align-items:center;justify-content:center}
+.ci-meta{flex:1}
+.ci-name{font-weight:600}
+.ci-sub{font-size:13px;color:var(--muted)}
+.ci-actions input{width:64px;padding:6px;border-radius:8px;border:1px solid #eef2f7}
+.small{font-size:13px;color:var(--muted)}
+
+.totals{padding-top:10px;border-top:1px solid rgba(15,23,36,0.04);display:flex;flex-direction:column;gap:8px}
+.row{display:flex;justify-content:space-between}
+.big{font-size:18px;font-weight:700}
+.checkout{margin-top:10px;display:flex;gap:8px}
+
+/* MODAL */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.45)}
+.modal-box{width:420px;background:#fff;border-radius:12px;padding:18px}
+.modal-fields{display:flex;flex-direction:column;gap:8px}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px}
+
+/* RESPONSIVE */
+@media(max-width:900px){main{grid-template-columns:1fr}.cart{order:2}}
+
+/* PRINT STYLES */
+@media print {
+    /* Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Only show the receipt modal */
+    #receiptModal, #receiptModal * {
+        visibility: visible;
+    }
+
+    /* Reset modal positioning for print */
+    #receiptModal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: auto;
+        background: white;
+        z-index: 9999;
+        display: block !important;
+        overflow: visible;
+    }
+
+    .receipt-content {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        border: none;
+    }
+
+    /* Hide buttons and footer in modal */
+    .receipt-footer button, .receipt-footer .btn {
+        display: none !important;
+    }
+    
+    .receipt-footer {
+        margin-top: 40px;
+        border-top: 1px dashed #ccc;
+    }
+
+    /* Hide background elements to be safe */
+    .pos-container, .sales-header, nav, header {
+        display: none !important;
+    }
+}

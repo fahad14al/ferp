@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if order_form.instance.pk %}Edit{% else %}Create{% endif %} Purchase Order - Purchase{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+<style>
+    .item-row {
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <h1>{% if order_form.instance.pk %}Edit{% else %}Create{% endif %} Purchase Order</h1>
+    </div>
+</div>
+
+<div class="container">
+    <form method="post" id="purchaseOrderForm">
+        {% csrf_token %}
+
+        <div class="card sales-card">
+            <div class="card-header">
+                <h5>Order Information</h5>
+            </div>
+            <div class="card-body">
+                {% if order_form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {{ order_form.non_field_errors }}
+                    </div>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-4">
+                        {{ order_form.supplier|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ order_form.status|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ order_form.order_date|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        {{ order_form.expected_delivery_date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ order_form.payment_terms|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        {{ order_form.priority|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ order_form.terms_conditions|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        {{ order_form.notes|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ order_form.supplier_notes|as_crispy_field }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        {{ order_form.tax_rate|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ order_form.shipping_cost|as_crispy_field }}
+                    </div>
+                    <div class="col-md-4">
+                        {{ order_form.discount_amount|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card sales-card mt-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Order Items</h5>
+                <button type="button" id="addItemBtn" class="btn btn-sm btn-outline-primary">Add Item</button>
+            </div>
+            <div class="card-body">
+                {% if item_formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        {{ item_formset.non_form_errors }}
+                    </div>
+                {% endif %}
+                <div id="itemsContainer">
+                    {{ item_formset.management_form }}
+                    {% for item_form in item_formset %}
+                        <div class="item-row">
+                            {% if item_form.instance.pk %}
+                                {{ item_form.DELETE }}
+                            {% endif %}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    {{ item_form.product|as_crispy_field }}
+                                </div>
+                                <div class="col-md-2">
+                                    {{ item_form.quantity_ordered|as_crispy_field }}
+                                </div>
+                                <div class="col-md-2">
+                                    {{ item_form.unit_price|as_crispy_field }}
+                                </div>
+                                <div class="col-md-2">
+                                    {{ item_form.discount_percent|as_crispy_field }}
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    {% if item_form.instance.pk %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">Remove</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">{% if order_form.instance.pk %}Update{% else %}Create{% endif %} Order</button>
+            <a href="{% url 'purchase:purchase_order_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<!-- Quick Product Create Modal -->
+<div class="modal fade" id="quickProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="quickProductForm">
+                    <div class="mb-3">
+                        <label class="form-label">Product Name *</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SKU *</label>
+                        <input type="text" class="form-control" name="sku" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cost Price</label>
+                            <input type="number" class="form-control" name="cost_price" step="0.01" value="0">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Selling Price</label>
+                            <input type="number" class="form-control" name="price" step="0.01" value="0">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveQuickProductBtn">Create Product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const itemsContainer = document.getElementById('itemsContainer');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+    
+    // Quick Product Create Logic
+    const quickProductModal = new bootstrap.Modal(document.getElementById('quickProductModal'));
+    const saveQuickProductBtn = document.getElementById('saveQuickProductBtn');
+    let activeProductSelect = null; // To track which select triggered the modal (if implemented later)
+
+    // Add "Create New Product" button next to "Add Item"
+    const createProductBtn = document.createElement('button');
+    createProductBtn.type = 'button';
+    createProductBtn.className = 'btn btn-sm btn-outline-success ms-2';
+    createProductBtn.innerHTML = '<i class="fas fa-plus"></i> New Product';
+    createProductBtn.onclick = function() {
+        document.getElementById('quickProductForm').reset();
+        quickProductModal.show();
+    };
+    addItemBtn.parentNode.insertBefore(createProductBtn, addItemBtn.nextSibling);
+
+    saveQuickProductBtn.addEventListener('click', function() {
+        const form = document.getElementById('quickProductForm');
+        if (!form.reportValidity()) return;
+
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Show loading state
+        const originalBtnText = saveQuickProductBtn.innerText;
+        saveQuickProductBtn.innerText = 'Creating...';
+        saveQuickProductBtn.disabled = true;
+
+        fetch('{% url "inventory:api_product_create" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Add new product to all select dropdowns
+                const productSelects = document.querySelectorAll('select.item-product');
+                productSelects.forEach(select => {
+                    const option = new Option(
+                        `${result.product.name} (${result.product.sku})`, 
+                        result.product.id
+                    );
+                    select.add(option);
+                });
+
+                // Close modal and show success
+                quickProductModal.hide();
+                showNotification('Product created successfully', 'success');
+                
+                // If we just added a product, maybe add a new row and select it?
+                // For now, just let the user select it manually
+            } else {
+                showNotification(result.error || 'Failed to create product', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred', 'error');
+        })
+        .finally(() => {
+            saveQuickProductBtn.innerText = originalBtnText;
+            saveQuickProductBtn.disabled = false;
+        });
+    });
+
+    // Add item button
+    addItemBtn.addEventListener('click', function() {
+        addItemRow();
+    });
+
+    // Remove item buttons (Soft Delete + Hide)
+    itemsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-item-btn')) {
+            const itemRow = e.target.closest('.item-row');
+            const deleteCheckbox = itemRow.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            
+            if (deleteCheckbox) {
+                // Existing DB item: mark delete and hide
+                deleteCheckbox.checked = true;
+                itemRow.style.display = 'none';
+            } else {
+                // New JS item: remove from DOM and re-index
+                itemRow.remove();
+                updateFormIndices();
+            }
+        }
+    });
+
+    function addItemRow() {
+        const formCount = parseInt(totalForms.value);
+        // Get existing options from the first select to replicate them
+        const firstSelect = document.querySelector('select.item-product');
+        let optionsHtml = '<option value="">Select Product</option>';
+        
+        if (firstSelect) {
+            // Copy options from existing select
+            Array.from(firstSelect.options).forEach(opt => {
+                if (opt.value) {
+                    optionsHtml += `<option value="${opt.value}">${opt.text}</option>`;
+                }
+            });
+        } else {
+            // Fallback
+            {% for product in products %}
+            optionsHtml += `<option value="{{ product.id }}">{{ product.name }} ({{ product.sku }})</option>`;
+            {% endfor %}
+        }
+
+        const newForm = `
+            <div class="item-row">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label class="form-label">Product</label>
+                        <select name="form-${formCount}-product" class="form-control item-product" required>
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" name="form-${formCount}-quantity_ordered" class="form-control item-quantity" min="1" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" name="form-${formCount}-unit_price" class="form-control item-price" step="0.01" min="0" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Discount %</label>
+                        <input type="number" name="form-${formCount}-discount_percent" class="form-control item-discount" step="0.01" min="0" max="100">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">Remove</button>
+                    </div>
+                    <input type="hidden" name="form-${formCount}-id" id="id_form-${formCount}-id">
+                </div>
+            </div>
+        `;
+        itemsContainer.insertAdjacentHTML('beforeend', newForm);
+        totalForms.value = formCount + 1;
+    }
+
+    function updateFormIndices() {
+        // Only target visible rows or all rows? 
+        // Django expects ALL rows (deleted or not) to be in index sequence.
+        // But since we REMOVE new rows from DOM, and HIDE existing rows...
+        // Hidden existing rows MUST keep their index? No, if we re-index everything, it's fine as long as order is preserved.
+        // Wait, if we re-index a hidden row, it's just a row.
+        
+        const rows = itemsContainer.querySelectorAll('.item-row');
+        rows.forEach((row, index) => {
+            // Update all inputs, selects, textareas
+            row.querySelectorAll('input, select, textarea').forEach(input => {
+                if (input.name) {
+                    input.name = input.name.replace(/form-\d+-/, `form-${index}-`);
+                }
+                if (input.id) {
+                    input.id = input.id.replace(/form-\d+-/, `form-${index}-`);
+                }
+            });
+        });
+        totalForms.value = rows.length;
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

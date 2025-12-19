@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Suppliers - Purchase{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Suppliers</h1>
+            <a href="{% url 'inventory:supplier_create' %}" class="btn btn-add-order">Add Supplier</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card sales-card">
+        <div class="card-body">
+            <div class="table-responsive d-none d-md-block">
+                <table class="table sales-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact Email</th>
+                            <th>Contact Phone</th>
+                            <th>Address</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supplier in suppliers %}
+                        <tr>
+                            <td>{{ supplier.name }}</td>
+                            <td>{{ supplier.contact_email|default:"-" }}</td>
+                            <td>{{ supplier.contact_phone|default:"-" }}</td>
+                            <td>{{ supplier.address|truncatechars:50|default:"-" }}</td>
+                            <td>
+                                <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                                <a href="{% url 'inventory:supplier_update' supplier.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No suppliers found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="d-md-none">
+                {% for supplier in suppliers %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ supplier.name }}</h5>
+                        <p class="card-text">
+                            <strong>Email:</strong> {{ supplier.contact_email|default:"-" }}<br>
+                            <strong>Phone:</strong> {{ supplier.contact_phone|default:"-" }}<br>
+                            <strong>Address:</strong> {{ supplier.address|truncatechars:50|default:"-" }}
+                        </p>
+                        <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        <a href="{% url 'inventory:supplier_update' supplier.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center">No suppliers found.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sales Orders - Sales{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Sales Orders</h1>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Status Filter -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a href="{% url 'sales:sales_order_list' %}" class="btn btn-outline-primary {% if not current_status %}active{% endif %}">All</a>
+            {% for status_value, status_label in status_choices %}
+            <a href="?status={{ status_value }}" class="btn btn-outline-primary {% if current_status == status_value %}active{% endif %}">{{ status_label }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="card sales-card">
+        <div class="card-body">
+            <div class="table-responsive d-none d-md-block">
+                <table class="table sales-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Invoice</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in sales_orders %}
+                        <tr>
+                            <td>{{ order.order_number }}</td>
+                            <td>{{ order.customer.name }}</td>
+                            <td>{{ order.order_date|date:"M d, Y" }}</td>
+                            <td>
+                                <span class="badge
+                                    {% if order.status == 'draft' %}bg-secondary
+                                    {% elif order.status == 'confirmed' %}bg-info
+                                    {% elif order.status == 'processing' %}bg-warning
+                                    {% elif order.status == 'shipped' %}bg-primary
+                                    {% elif order.status == 'delivered' %}bg-success
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% with invoice=order.invoices.first %}
+                                    {% if invoice %}
+                                        <div>
+                                            <a href="{% url 'sales:invoice_detail' invoice.pk %}" class="fw-bold text-decoration-none">
+                                                {{ invoice.invoice_number }}
+                                            </a>
+                                        </div>
+                                        <span class="badge 
+                                            {% if invoice.status == 'paid' %}bg-success
+                                            {% elif invoice.status == 'issued' %}bg-primary
+                                            {% elif invoice.status == 'overdue' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ invoice.get_status_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>{{ order.total_amount }}</td>
+                            <td>
+                                <a href="{% url 'sales:sales_order_detail' order.pk %}" class="btn btn-view">View</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No sales orders found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Card View -->
+            <div class="mobile-table d-block d-md-none">
+                {% for order in sales_orders %}
+                <div class="mobile-row">
+                    <div class="mobile-field">
+                        <span class="mobile-label">Order:</span>
+                        <span class="mobile-value">{{ order.order_number }}</span>
+                    </div>
+                    <div class="mobile-field">
+                        <span class="mobile-label">Customer:</span>
+                        <span class="mobile-value">{{ order.customer.name }}</span>
+                    </div>
+                    <div class="mobile-field">
+                        <span class="mobile-label">Date:</span>
+                        <span class="mobile-value">{{ order.order_date|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="mobile-field">
+                        <span class="mobile-label">Status:</span>
+                        <span class="mobile-value">
+                            <span class="badge
+                                {% if order.status == 'draft' %}bg-secondary
+                                {% elif order.status == 'confirmed' %}bg-info
+                                {% elif order.status == 'processing' %}bg-warning
+                                {% elif order.status == 'shipped' %}bg-primary
+                                {% elif order.status == 'delivered' %}bg-success
+                                {% else %}bg-danger{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </span>
+                    </div>
+                    <div class="mobile-field">
+                        <span class="mobile-label">Total:</span>
+                        <span class="mobile-value">{{ order.total_amount }}</span>
+                    </div>
+                    <div class="mobile-field">
+                        <a href="{% url 'sales:sales_order_detail' order.pk %}" class="btn btn-view btn-sm">View Details</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="mobile-row text-center">
+                    <p class="mb-0">No sales orders found.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

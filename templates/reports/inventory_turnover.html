@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventory Turnover Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    .turnover-high { color: #1cc88a; font-weight: bold; }
+    .turnover-medium { color: #f6c23e; font-weight: bold; }
+    .turnover-low { color: #e74a3b; font-weight: bold; }
+    .stock-badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">{{ report_title }}</h1>
+            <p class="text-muted">Product turnover rates and inventory efficiency</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Product Inventory Analysis</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Category</th>
+                                    <th>Current Stock</th>
+                                    <th>Stock Value</th>
+                                    <th>Turnover Ratio</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in product_data %}
+                                <tr>
+                                    <td>{{ data.product.name }}</td>
+                                    <td><code>{{ data.product.sku }}</code></td>
+                                    <td>
+                                        {% if data.product.category %}
+                                            <span class="badge bg-secondary">{{ data.product.category.name }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ data.product.stock_quantity }}</td>
+                                    <td>{{ data.stock_value|floatformat:2 }}</td>
+                                    <td>
+                                        {% if data.turnover_ratio > 5 %}
+                                            <span class="turnover-high">{{ data.turnover_ratio|floatformat:2 }}</span>
+                                        {% elif data.turnover_ratio > 2 %}
+                                            <span class="turnover-medium">{{ data.turnover_ratio|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="turnover-low">{{ data.turnover_ratio|floatformat:2 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if data.product.is_low_stock %}
+                                            <span class="stock-badge bg-danger text-white">
+                                                <i class="fas fa-exclamation-triangle"></i> Low Stock
+                                            </span>
+                                        {% else %}
+                                            <span class="stock-badge bg-success text-white">
+                                                <i class="fas fa-check"></i> In Stock
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No product data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="font-weight-bold">Turnover Ratio Legend:</h6>
+                    <ul class="mb-0">
+                        <li><span class="turnover-high">High (&gt; 5)</span> - Fast-moving inventory</li>
+                        <li><span class="turnover-medium">Medium (2-5)</span> - Moderate movement</li>
+                        <li><span class="turnover-low">Low (&lt; 2)</span> - Slow-moving inventory</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

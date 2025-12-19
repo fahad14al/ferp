@@ -1,0 +1,485 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ERP System{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --primary-color: #3b82f6;
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+        }
+        body {
+            background: #f8fafc;
+            padding-top: 0;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: #334155;
+        }
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: var(--sidebar-bg);
+            color: #f8fafc;
+            z-index: 1000;
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+        }
+        
+        .sidebar-header {
+            padding: 30px 24px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sidebar-brand {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-brand i {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 0;
+        }
+
+        .sidebar a {
+            color: #94a3b8;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .sidebar a i {
+            margin-right: 12px;
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            background: var(--sidebar-hover);
+            color: #fff;
+            border-left-color: var(--primary-color);
+        }
+
+        .sidebar a.active i {
+            color: var(--primary-color);
+        }
+
+        .nav-heading {
+            color: #475569;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            padding: 20px 24px 8px;
+            letter-spacing: 1.2px;
+        }
+
+        /* Simplified Sidebar Auth */
+        .sidebar-user {
+            margin-top: auto;
+            padding: 24px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .user-auth-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            font-size: 14px;
+        }
+
+        .user-auth-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .user-auth-links a:hover {
+            color: #fff;
+        }
+
+        .user-auth-divider {
+            color: #475569;
+        }
+
+        .user-card {
+            background: rgba(255,255,255,0.05);
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .user-profile-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .user-details .username {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .user-details .role {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .btn-logout { 
+            background: #ef4444; 
+            color: #fff; 
+            width: 100%; 
+            display: block; 
+            margin-top: 4px; 
+            font-size: 13px;
+            padding: 8px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-logout:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Content Area Adjustments */
+        .content-area {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease-in-out;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Added Standard Header Placeholder */
+        .content-top-bar {
+            height: 60px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .content-body {
+            padding: 30px;
+            flex: 1;
+        }
+
+        /* Mobile Sidebar Toggle Button */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+            font-size: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 900;
+        }
+
+        /* Mobile Styles */
+        @media(max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .content-area {
+                margin-left: 0;
+            }
+            .content-top-bar {
+                padding-left: 20px;
+            }
+            .sidebar-overlay.show {
+                display: block;
+            }
+            .mobile-toggle {
+                display: flex;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Mobile Toggle -->
+    <button class="mobile-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'dashboard:dashboard' %}" class="sidebar-brand">
+                <i class="fas fa-cube"></i>
+                FERP
+            </a>
+        </div>
+
+        <div class="sidebar-nav">
+            <a href="{% url 'dashboard:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+
+            <div class="nav-heading">Inventory</div>
+            <a href="{% url 'inventory:inventory_list' %}" class="{% if 'inventory' in request.path %}active{% endif %}">
+                <i class="fas fa-boxes"></i> Products
+            </a>
+            <a href="{% url 'inventory:category_list' %}">
+                <i class="fas fa-tags"></i> Categories
+            </a>
+
+            <div class="nav-heading">Sales</div>
+            <a href="{% url 'sales:sales_order_list' %}" class="{% if 'sales' in request.path and 'pos' not in request.path %}active{% endif %}">
+                <i class="fas fa-shopping-cart"></i> Sales Orders
+            </a>
+            <a href="{% url 'sales:pos' %}" class="{% if 'pos' in request.path %}active{% endif %}">
+                <i class="fas fa-cash-register"></i> POS
+            </a>
+            <a href="{% url 'sales:invoice_list' %}">
+                <i class="fas fa-file-invoice-dollar"></i> Invoices
+            </a>
+
+            <div class="nav-heading">Purchase</div>
+            <a href="{% url 'purchase:purchase_order_list' %}" class="{% if 'purchase' in request.path %}active{% endif %}">
+                <i class="fas fa-truck-loading"></i> Purchase Orders
+            </a>
+            <a href="{% url 'purchase:supplier_list' %}">
+                <i class="fas fa-truck"></i> Suppliers
+            </a>
+
+            <div class="nav-heading">Reports</div>
+            <a href="{% url 'reports:report_list' %}" class="{% if 'reports' in request.path %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i> Reports
+            </a>
+        </div>
+
+        <div class="sidebar-user">
+            {% if request.user.is_authenticated %}
+                <div class="user-card">
+                    <div class="user-profile-info">
+                        <div class="user-avatar">
+                            {{ request.user.username|make_list|first|upper }}
+                        </div>
+                        <div class="user-details">
+                            <span class="username">{{ request.user.username }}</span>
+                            <span class="role">Administrator</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'account:logout' %}" class="btn-logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            {% else %}
+                <div class="user-auth-links">
+                    <a href="{% url 'account:login' %}">Login</a>
+                    <span class="user-auth-divider">|</span>
+                    <a href="{% url 'account:signup' %}">Sign Up</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="content-area">
+        <div class="content-top-bar">
+            <!-- Breadcrumbs or simple page title could go here -->
+            <span class="text-secondary small fw-medium text-uppercase letter-spacing-1">
+                {% block breadcrumb %}FERP{% endblock %}
+            </span>
+        </div>
+        <div class="content-body">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/signup.js' %}"></script>
+    
+    <!-- Global Form Success Handler -->
+    <script>
+        // Sidebar Toggle Logic
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+
+            if(sidebarToggle) {
+                sidebarToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleSidebar();
+                });
+            }
+
+            if(overlay) {
+                overlay.addEventListener('click', toggleSidebar);
+            }
+            
+            // Close sidebar when clicking links on mobile
+            const sidebarLinks = sidebar.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                   if (window.innerWidth < 992) {
+                       toggleSidebar();
+                   }
+                });
+            });
+        });
+
+        // Show success messages as Bootstrap alerts with auto-dismiss
+        {% if messages %}
+            {% for message in messages %}
+                showNotification('{{ message }}', '{{ message.tags }}');
+            {% endfor %}
+        {% endif %}
+
+        function showNotification(message, type) {
+            // Map Django message tags to Bootstrap alert types
+            const typeMap = {
+                'success': 'success',
+                'error': 'danger',
+                'warning': 'warning',
+                'info': 'info'
+            };
+            const alertType = typeMap[type] || 'info';
+            
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${alertType} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
+        }
+
+        // Form submission handler with success popup and field clearing
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form[data-clear-on-success]');
+            
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    // Let the form submit normally
+                    // After page reload, messages will be shown and form will be empty
+                });
+            });
+        });
+
+        // Clear form after successful submission (for same-page forms)
+        function clearFormFields(formId) {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.reset();
+                // Reset select2 or other custom inputs if present
+                const selects = form.querySelectorAll('select');
+                selects.forEach(select => {
+                    select.selectedIndex = 0;
+                });
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+
+</body>
+</html>

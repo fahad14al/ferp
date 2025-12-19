@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static crispy_forms_tags %}
+
+{% block title %}Edit Supplier - {{ supplier.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Edit Supplier</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">Suppliers</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_detail' supplier.pk %}">{{ supplier.name }}</a></li>
+                        <li class="breadcrumb-item active">Edit</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-outline-info me-2">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+                <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Suppliers
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-edit"></i> Edit Supplier Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div>
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                    <i class="fas fa-trash"></i> Delete Supplier
+                                </button>
+                            </div>
+                            <div>
+                                <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Update Supplier
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Supplier Stats -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-chart-bar"></i> Current Statistics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-number">{{ supplier.product_set.count }}</div>
+                            <div class="stat-label">Products</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-number">{{ supplier.product_set.aggregate|length }}</div>
+                            <div class="stat-label">Total Value</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Supplier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the supplier "<strong>{{ supplier.name }}</strong>"?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Warning:</strong> This action cannot be undone. Products from this supplier will have their supplier set to blank.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'inventory:supplier_delete' supplier.pk %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Supplier</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format phone number
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.querySelector('input[name="contact_phone"]');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 10) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else if (value.length >= 6) {
+                value = value.replace(/(\d{3})(\d{3})/, '($1) $2-');
+            } else if (value.length >= 3) {
+                value = value.replace(/(\d{3})/, '($1) ');
+            }
+            e.target.value = value;
+        });
+    }
+});
+</script>
+{% endblock %}

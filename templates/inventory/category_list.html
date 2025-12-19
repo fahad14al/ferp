@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Categories - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    }
+
+    .page-header {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    /* Table Styles */
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+    }
+
+    .table thead th {
+        background: #f8fafc;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .table tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.95rem;
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* Avatar/Icon */
+    .category-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: #e0e7ff;
+        color: #4f46e5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-right: 1rem;
+    }
+
+    /* Mobile Card */
+    .mobile-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-gradient-primary {
+        background: var(--primary-gradient);
+        border: none;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+    
+    .btn-gradient-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        color: white;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+
+    .search-input {
+        padding-left: 2.75rem;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding-top: 0.6rem;
+        padding-bottom: 0.6rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="header-title">Categories</h1>
+            <div class="text-muted small mt-1">Manage product classifications</div>
+        </div>
+        <a href="{% url 'inventory:category_create' %}" class="btn btn-gradient-primary">
+            <i class="fas fa-plus me-2"></i>Add Category
+        </a>
+    </div>
+</div>
+
+<div class="container-fluid px-4 pb-5">
+    
+    <!-- Controls -->
+    <div class="row mb-4">
+        <div class="col-md-5 col-lg-4">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="categorySearch" class="form-control search-input" placeholder="Search categories...">
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Table -->
+    <div class="table-card d-none d-md-block">
+        <table class="table mb-0" id="categoryTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th class="text-center">Products</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="category-icon">
+                                {{ category.name|slice:":1"|upper }}
+                            </div>
+                            <div class="fw-bold text-dark">{{ category.name }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="text-muted">{{ category.description|default:"-"|truncatechars:60 }}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="badge bg-light text-dark border">{{ category.product_set.count }}</span>
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'inventory:category_update' category.pk %}" class="btn btn-sm btn-light border text-primary me-1" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button class="btn btn-sm btn-light border text-danger" title="Delete" onclick="confirmDelete({{ category.pk }}, '{{ category.name }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5">
+                        <div class="text-muted">No categories found</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Mobile Cards -->
+    <div class="d-md-none" id="mobileCategoryList">
+        {% for category in categories %}
+        <div class="mobile-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div class="d-flex align-items-center">
+                    <div class="category-icon" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                        {{ category.name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div class="fw-bold text-dark search-target">{{ category.name }}</div>
+                        <div class="text-muted small">{{ category.product_set.count }} products</div>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm rounded-circle border" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v text-muted"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <li><a class="dropdown-item" href="{% url 'inventory:category_update' category.pk %}">Edit</a></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="confirmDelete({{ category.pk }}, '{{ category.name }}')">Delete</a></li>
+                    </ul>
+                </div>
+            </div>
+            {% if category.description %}
+            <p class="text-muted small mb-0">{{ category.description|truncatechars:80 }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- Delete Modal (Reused) -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Delete Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-4">
+                <p class="text-center">Are you sure you want to delete <strong id="delete-category-name"></strong>?</p>
+                <p class="text-center text-muted small">Products in this category will be unassigned.</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pb-4">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancel</button>
+                <form id="delete-form" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('categorySearch');
+    const tableRows = document.querySelectorAll('#categoryTable tbody tr');
+    const mobileCards = document.querySelectorAll('.mobile-card');
+
+    searchInput.addEventListener('keyup', function(e) {
+        const term = e.target.value.toLowerCase();
+
+        // Filter Table
+        tableRows.forEach(row => {
+            if (row.cells.length < 2) return; // Skip empty/loading rows
+            const name = row.cells[0].textContent.toLowerCase();
+            const desc = row.cells[1].textContent.toLowerCase();
+            if (name.includes(term) || desc.includes(term)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Filter Mobile Cards
+        mobileCards.forEach(card => {
+            const name = card.querySelector('.search-target').textContent.toLowerCase();
+            if (name.includes(term)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+
+function confirmDelete(categoryId, categoryName) {
+    document.getElementById('delete-category-name').textContent = categoryName;
+    document.getElementById('delete-form').action = `/inventory/categories/${categoryId}/delete/`;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Receive Items - Purchase Order {{ order.order_number }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <h1>Receive Items - Purchase Order {{ order.order_number }}</h1>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card sales-card">
+        <div class="card-header">
+            <h5>Items to Receive</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Ordered</th>
+                                <th>Previously Received</th>
+                                <th>Remaining</th>
+                                <th>Receive Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>{{ item.product.name }}</td>
+                                <td>{{ item.product.sku }}</td>
+                                <td>{{ item.quantity_ordered }}</td>
+                                <td>{{ item.quantity_received }}</td>
+                                <td>{{ item.quantity_ordered|add:item.quantity_received|negate }}</td>
+                                <td>
+                                    <input type="hidden" name="item_id[]" value="{{ item.id }}">
+                                    <input type="number" name="receive_quantity[]" class="form-control"
+                                           min="0" max="{{ item.quantity_ordered|add:item.quantity_received|negate }}"
+                                           value="{{ item.quantity_ordered|add:item.quantity_received|negate }}" required>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-success">Receive Items</button>
+                    <a href="{% url 'purchase:purchase_order_detail' order.pk %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

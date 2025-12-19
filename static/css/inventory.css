@@ -1,0 +1,954 @@
+/* Inventory App Custom Styles */
+
+.inventory-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+}
+
+.inventory-header h1 {
+    margin: 0;
+    font-weight: 700;
+}
+
+.low-stock-alert {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    border: none;
+    border-radius: 10px;
+    color: #721c24;
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.inventory-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.inventory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.inventory-table {
+    margin-bottom: 0;
+}
+
+.inventory-table thead th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.inventory-table tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.inventory-table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.inventory-table .badge {
+    font-size: 0.8em;
+    padding: 0.4em 0.8em;
+}
+
+.btn-add-product {
+    background: linear-gradient(135deg, #f5514b 0%, #499ff0 100%);
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-add-product:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.btn-view:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+}
+
+/* Create Form Styles */
+.create-form-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.form-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.form-header h1 {
+    margin: 0;
+    font-weight: 700;
+}
+
+.form-body {
+    padding: 2rem;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-back {
+    border: 2px solid #6c757d;
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+/* Detail Page Styles */
+.product-detail-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.product-detail-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px 15px 0 0;
+}
+
+.product-detail-header h1 {
+    margin: 0;
+    font-weight: 700;
+}
+
+.detail-section {
+    padding: 2rem;
+}
+
+.detail-item {
+    margin-bottom: 1rem;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #495057;
+    display: inline-block;
+    width: 150px;
+}
+
+.detail-value {
+    color: #6c757d;
+}
+
+.stock-movements {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.movement-item {
+    padding: 0.75rem;
+    border-left: 4px solid #667eea;
+    background: #f8f9fa;
+    margin-bottom: 0.5rem;
+    border-radius: 5px;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+    .inventory-header {
+        padding: 1.8rem 0;
+    }
+
+    .inventory-card {
+        margin-bottom: 1.8rem;
+    }
+}
+
+@media (max-width: 1200px) {
+    .inventory-header {
+        padding: 1.5rem 0;
+    }
+
+    .inventory-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-add-product {
+        padding: 0.7rem 1.8rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .inventory-header h1 {
+        font-size: 2rem;
+    }
+
+    .btn-add-product {
+        padding: 0.6rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .inventory-table th,
+    .inventory-table td {
+        padding: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .low-stock-alert {
+        padding: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .inventory-header {
+        padding: 1rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .inventory-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .inventory-header .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .low-stock-alert {
+        padding: 0.8rem;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .inventory-card {
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+
+    .inventory-table {
+        font-size: 0.85rem;
+    }
+
+    .inventory-table th,
+    .inventory-table td {
+        padding: 0.4rem;
+    }
+
+    .btn-add-product,
+    .btn-back {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        width: 100%;
+        max-width: 200px;
+        margin: 0 auto;
+    }
+
+    .btn-view {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .form-body {
+        padding: 1rem;
+    }
+
+    .form-control {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .btn-create {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .product-detail-header {
+        padding: 1.5rem;
+    }
+
+    .product-detail-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .detail-section {
+        padding: 1rem;
+    }
+
+    .detail-label {
+        width: 120px;
+        font-size: 0.9rem;
+    }
+
+    .detail-value {
+        font-size: 0.9rem;
+    }
+
+    /* Mobile table improvements */
+    .mobile-table .mobile-row {
+        padding: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .mobile-table .mobile-field {
+        margin-bottom: 0.6rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .mobile-table .mobile-label {
+        font-weight: 600;
+        color: #495057;
+        flex-shrink: 0;
+        margin-right: 1rem;
+        min-width: 70px;
+    }
+
+    .mobile-table .mobile-value {
+        color: #6c757d;
+        flex-grow: 1;
+        text-align: right;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .inventory-header {
+        padding: 0.8rem 0;
+        border-radius: 5px;
+    }
+
+    .inventory-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .low-stock-alert {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+        margin-bottom: 1rem;
+    }
+
+    .inventory-card {
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .inventory-table {
+        font-size: 0.8rem;
+    }
+
+    .inventory-table th,
+    .inventory-table td {
+        padding: 0.3rem;
+    }
+
+    .btn-add-product,
+    .btn-back,
+    .btn-view {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .form-body {
+        padding: 0.8rem;
+    }
+
+    .form-control {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+    }
+
+    .btn-create {
+        padding: 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .product-detail-header {
+        padding: 1rem;
+    }
+
+    .product-detail-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .detail-section {
+        padding: 0.8rem;
+    }
+
+    .detail-label {
+        width: 100px;
+        font-size: 0.85rem;
+    }
+
+    .detail-value {
+        font-size: 0.85rem;
+    }
+
+    .movement-item {
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    /* Table responsive adjustments */
+    .table-responsive {
+        border-radius: 8px;
+    }
+
+    .inventory-table th:nth-child(3),
+    .inventory-table td:nth-child(3),
+    .inventory-table th:nth-child(5),
+    .inventory-table td:nth-child(5) {
+        display: none;
+    }
+
+    /* Mobile table alternative */
+    .mobile-table {
+        display: block;
+    }
+
+    .mobile-table .mobile-row {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
+
+    .mobile-table .mobile-field {
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-table .mobile-label {
+        font-weight: 600;
+        color: #495057;
+        display: inline-block;
+        width: 80px;
+    }
+
+    .mobile-table .mobile-value {
+        color: #6c757d;
+    }
+}
+
+@media (max-width: 480px) {
+    .inventory-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .inventory-table th,
+    .inventory-table td {
+        padding: 0.25rem;
+        font-size: 0.75rem;
+    }
+
+    .btn-add-product,
+    .btn-back,
+    .btn-view {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    .form-control {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-create {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    .detail-label {
+        width: 80px;
+        font-size: 0.8rem;
+    }
+
+    .detail-value {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .container {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .inventory-header {
+        padding: 0.5rem 0;
+        margin-bottom: 0.5rem;
+    }
+
+    .inventory-header h1 {
+        font-size: 1.1rem;
+    }
+
+    .low-stock-alert {
+        padding: 0.4rem;
+        font-size: 0.75rem;
+        margin-bottom: 0.6rem;
+    }
+
+    .inventory-card {
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-add-product,
+    .btn-back,
+    .btn-view {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
+    }
+
+    .form-body {
+        padding: 0.5rem;
+    }
+
+    .form-control {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .btn-create {
+        padding: 0.4rem;
+        font-size: 0.75rem;
+    }
+
+    .mobile-table .mobile-row {
+        padding: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .mobile-table .mobile-label {
+        min-width: 45px;
+        font-size: 0.75rem;
+    }
+
+    .mobile-table .mobile-value {
+        font-size: 0.75rem;
+    }
+}
+
+/* Additional Responsive Utilities */
+@media (max-width: 1400px) and (min-width: 1201px) {
+    .inventory-header {
+        padding: 1.8rem 0;
+    }
+}
+
+@media (max-width: 1200px) and (min-width: 993px) {
+    .inventory-header h1 {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 992px) and (min-width: 769px) {
+    .inventory-header h1 {
+        font-size: 2.1rem;
+    }
+
+    .btn-add-product {
+        padding: 0.65rem 1.6rem;
+    }
+}
+
+/* Fluid container adjustments */
+@media (min-width: 576px) {
+    .container {
+        max-width: 100%;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding-left: 25px;
+        padding-right: 25px;
+    }
+}
+
+@media (min-width: 992px) {
+    .container {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        padding-left: 40px;
+        padding-right: 40px;
+    }
+}
+
+/* Enhanced mobile interactions */
+@media (max-width: 768px) {
+    .inventory-card:hover {
+        transform: none; /* Disable hover effects on touch devices */
+    }
+
+    .btn-add-product:hover,
+    .btn-view:hover {
+        transform: none;
+    }
+
+    /* Better touch targets */
+    .mobile-table .mobile-field {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .mobile-table .mobile-field:last-child {
+        border-bottom: none;
+        padding-top: 1rem;
+    }
+}
+
+/* Supplier Management Styles */
+.supplier-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.supplier-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+}
+
+.supplier-contact {
+    margin-bottom: 0.5rem;
+}
+
+.supplier-contact small {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.supplier-address {
+    margin-bottom: 0.5rem;
+}
+
+.supplier-stats {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #495057;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.supplier-card .card-body {
+    padding: 1.5rem;
+}
+
+.supplier-card .card-title {
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.supplier-card .dropdown-menu {
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    border-radius: 10px;
+}
+
+.supplier-card .dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.supplier-card .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.supplier-card .btn-outline-primary,
+.supplier-card .btn-outline-secondary {
+    border-radius: 20px;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Timeline Styles for Recent Activity */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, #667eea, #764ba2);
+    border-radius: 1px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding-left: 1rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2.2rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.timeline-content small {
+    color: #6c757d;
+    font-size: 0.8rem;
+}
+
+.timeline-content p {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+    color: #495057;
+}
+
+/* Enhanced Form Styles for Suppliers */
+.supplier-form-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.supplier-form-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.supplier-form-header h1 {
+    margin: 0;
+    font-weight: 700;
+}
+
+.supplier-form-body {
+    padding: 2rem;
+}
+
+/* Delete Confirmation Styles */
+.delete-confirmation-card {
+    border: 2px solid #dc3545;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.2);
+}
+
+.delete-confirmation-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 13px 13px 0 0;
+}
+
+.delete-confirmation-header h5 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.delete-confirmation-body {
+    padding: 2rem;
+}
+
+.supplier-info {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+/* Responsive Supplier Styles */
+@media (max-width: 768px) {
+    .supplier-card {
+        margin-bottom: 1rem;
+    }
+
+    .supplier-card .card-body {
+        padding: 1rem;
+    }
+
+    .supplier-stats {
+        padding: 0.8rem;
+        margin-top: 0.8rem;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .supplier-card .btn-outline-primary,
+    .supplier-card .btn-outline-secondary {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+
+    .timeline {
+        padding-left: 1.5rem;
+    }
+
+    .timeline-marker {
+        left: -1.7rem;
+        width: 0.8rem;
+        height: 0.8rem;
+    }
+
+    .timeline-content {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .supplier-form-body,
+    .delete-confirmation-body {
+        padding: 1rem;
+    }
+
+    .supplier-info {
+        padding: 1rem;
+    }
+
+    .supplier-stats {
+        padding: 0.6rem;
+    }
+
+    .stat-number {
+        font-size: 1rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .timeline {
+        padding-left: 1rem;
+    }
+
+    .timeline-marker {
+        left: -1.2rem;
+        width: 0.6rem;
+        height: 0.6rem;
+    }
+
+    .timeline-content {
+        padding: 0.5rem 0.6rem;
+        font-size: 0.85rem;
+    }
+}

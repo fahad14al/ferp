@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Purchase Orders - Purchase{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Purchase Orders</h1>
+            <a href="{% url 'purchase:purchase_order_create' %}" class="btn btn-add-order">Create Order</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Filters -->
+    <div class="mb-4">
+        <form method="get" class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        {{ filter_form.status|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ filter_form.supplier|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.date_from|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2">
+                        {{ filter_form.date_to|as_crispy_field }}
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">Filter</button>
+                        <a href="{% url 'purchase:purchase_order_list' %}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-3">
+                        {{ filter_form.payment_status|as_crispy_field }}
+                    </div>
+                    <div class="col-md-3">
+                        {{ filter_form.priority|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Analytics Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ analytics.total_orders }}</h5>
+                    <p class="card-text">Total Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ analytics.total_value|floatformat:2 }}</h5>
+                    <p class="card-text">Total Value</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ analytics.pending_orders }}</h5>
+                    <p class="card-text">Pending Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">{{ analytics.overdue_orders }}</h5>
+                    <p class="card-text">Overdue Orders</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card sales-card">
+        <div class="card-body">
+            <div class="table-responsive d-none d-md-block">
+                <table class="table sales-table">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Supplier</th>
+                            <th>Date</th>
+                            <th>Expected Delivery</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.order_number }}</td>
+                            <td>{{ order.supplier.name }}</td>
+                            <td>{{ order.order_date|date:"M d, Y" }}</td>
+                            <td>{% if order.expected_delivery_date %}{{ order.expected_delivery_date|date:"M d, Y" }}{% else %}-{% endif %}</td>
+                            <td>
+                                <span class="badge {% if order.status == 'draft' %}bg-secondary{% elif order.status == 'confirmed' %}bg-info{% elif order.status == 'processing' %}bg-warning{% elif order.status == 'received' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ order.total_amount|floatformat:2 }}</td>
+                            <td>
+                                <a href="{% url 'purchase:purchase_order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                                {% if order.status == 'confirmed' %}
+                                <a href="{% url 'purchase:purchase_order_receive' order.pk %}" class="btn btn-sm btn-outline-success">Receive</a>
+                                {% endif %}
+                                <a href="{% url 'purchase:purchase_order_update' order.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No purchase orders found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="d-md-none">
+                {% for order in orders %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ order.order_number }}</h5>
+                        <p class="card-text">
+                            <strong>Supplier:</strong> {{ order.supplier.name }}<br>
+                            <strong>Date:</strong> {{ order.order_date|date:"M d, Y" }}<br>
+                            <strong>Status:</strong>
+                            <span class="badge {% if order.status == 'draft' %}bg-secondary{% elif order.status == 'confirmed' %}bg-info{% elif order.status == 'processing' %}bg-warning{% elif order.status == 'received' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ order.get_status_display }}
+                            </span><br>
+                            <strong>Total:</strong> {{ order.total_amount|floatformat:2 }}
+                        </p>
+                        <a href="{% url 'purchase:purchase_order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        {% if order.status == 'confirmed' %}
+                        <a href="{% url 'purchase:purchase_order_receive' order.pk %}" class="btn btn-sm btn-outline-success">Receive</a>
+                        {% endif %}
+                        <a href="{% url 'purchase:purchase_order_update' order.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center">No purchase orders found.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

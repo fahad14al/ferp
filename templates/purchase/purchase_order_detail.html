@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Purchase Order {{ order.order_number }} - Purchase{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+<style>
+    .table th, .table td {
+        white-space: nowrap;
+        padding: 8px;
+        vertical-align: middle;
+    }
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Purchase Order {{ order.order_number }}</h1>
+            <div>
+                {% if order.status == 'draft' %}
+                <a href="{% url 'purchase:purchase_order_update' order.pk %}" class="btn btn-outline-secondary">Edit</a>
+                {% elif order.status == 'confirmed' %}
+                <a href="{% url 'purchase:purchase_order_receive' order.pk %}" class="btn btn-outline-success">Receive Items</a>
+                {% endif %}
+                <a href="{% url 'purchase:purchase_order_list' %}" class="btn btn-outline-primary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card sales-card">
+                <div class="card-header">
+                    <h5>Order Items</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Ordered</th>
+                                    <th>Received</th>
+                                    <th>Unit Price</th>
+                                    <th>Discount</th>
+                                    <th>Line Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.product.sku }}</td>
+                                    <td>{{ item.quantity_ordered }}</td>
+                                    <td>{{ item.quantity_received }}</td>
+                                    <td>{{ item.unit_price|floatformat:2 }}</td>
+                                    <td>{{ item.discount_percent }}%</td>
+                                    <td>{{ item.line_total|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card sales-card">
+                <div class="card-header">
+                    <h5>Order Details</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">Order Number:</dt>
+                        <dd class="col-sm-7">{{ order.order_number }}</dd>
+
+                        <dt class="col-sm-5">Supplier:</dt>
+                        <dd class="col-sm-7">{{ order.supplier.name }}</dd>
+
+                        <dt class="col-sm-5">Order Date:</dt>
+                        <dd class="col-sm-7">{{ order.order_date|date:"M d, Y" }}</dd>
+
+                        <dt class="col-sm-5">Expected Delivery:</dt>
+                        <dd class="col-sm-7">{% if order.expected_delivery_date %}{{ order.expected_delivery_date|date:"M d, Y" }}{% else %}-{% endif %}</dd>
+
+                        <dt class="col-sm-5">Status:</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge {% if order.status == 'draft' %}bg-secondary{% elif order.status == 'confirmed' %}bg-info{% elif order.status == 'processing' %}bg-warning{% elif order.status == 'received' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ order.get_status_display }}
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-5">Payment Terms:</dt>
+                        <dd class="col-sm-7">{{ order.payment_terms|default:"-" }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card sales-card mt-3">
+                <div class="card-header">
+                    <h5>Financial Summary</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-6">Subtotal:</dt>
+                        <dd class="col-sm-6">{{ order.subtotal|floatformat:2 }}</dd>
+
+                        <dt class="col-sm-6">Tax (15%):</dt>
+                        <dd class="col-sm-6">{{ order.tax_amount|floatformat:2 }}</dd>
+
+                        <dt class="col-sm-6">Discount:</dt>
+                        <dd class="col-sm-6">{{ order.discount_amount|floatformat:2 }}</dd>
+
+                        <dt class="col-sm-6"><strong>Total:</strong></dt>
+                        <dd class="col-sm-6"><strong>{{ order.total_amount|floatformat:2 }}</strong></dd>
+                    </dl>
+                </div>
+            </div>
+
+            {% if order.notes or order.supplier_notes %}
+            <div class="card sales-card mt-3">
+                <div class="card-header">
+                    <h5>Notes</h5>
+                </div>
+                <div class="card-body">
+                    {% if order.notes %}
+                    <h6>Internal Notes:</h6>
+                    <p>{{ order.notes }}</p>
+                    {% endif %}
+
+                    {% if order.supplier_notes %}
+                    <h6>Supplier Notes:</h6>
+                    <p>{{ order.supplier_notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

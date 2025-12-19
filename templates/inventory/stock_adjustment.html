@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Stock Adjustment - {{ product.name }} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Stock Adjustment</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_list' %}">Products</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:product_detail' product.pk %}">{{ product.name }}</a></li>
+                        <li class="breadcrumb-item active">Adjust Stock</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{% url 'inventory:product_detail' product.pk %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Product
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-balance-scale"></i> Adjust Stock for {{ product.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Current Stock Info -->
+                    <div class="current-stock-info mb-4">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="stock-info-card">
+                                    <h6>Current Stock</h6>
+                                    <span class="stock-number {% if product.stock_quantity == 0 %}text-danger{% elif product.is_low_stock %}text-warning{% else %}text-success{% endif %}">
+                                        {{ product.stock_quantity }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stock-info-card">
+                                    <h6>Reorder Level</h6>
+                                    <span class="stock-number text-info">{{ product.reorder_level }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stock-info-card">
+                                    <h6>Status</h6>
+                                    {% if product.stock_quantity == 0 %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% elif product.is_low_stock %}
+                                        <span class="badge bg-warning">Low Stock</span>
+                                    {% else %}
+                                        <span class="badge bg-success">In Stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.adjustment.id_for_label }}" class="form-label">
+                                        Quantity Adjustment
+                                        <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Positive numbers add stock, negative numbers reduce stock"></i>
+                                    </label>
+                                    {{ form.adjustment }}
+                                    {% if form.adjustment.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.adjustment.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        Current: {{ product.stock_quantity }} |
+                                        After adjustment: <span id="new-stock">{{ product.stock_quantity }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.reason.id_for_label }}" class="form-label">Reason</label>
+                                    {{ form.reason }}
+                                    {% if form.reason.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.reason.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.notes.id_for_label }}" class="form-label">Notes (Optional)</label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Additional details about this stock adjustment</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Stock Movement Preview:</strong>
+                            <span id="movement-preview">
+                                {% if product.stock_quantity > 0 %}
+                                    Reducing stock by 0 units
+                                {% else %}
+                                    Adding 0 units to stock
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Apply Adjustment
+                            </button>
+                            <a href="{% url 'inventory:product_detail' product.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6>Quick Adjustments</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success btn-sm quick-adjust" data-value="1">
+                            <i class="fas fa-plus"></i> +1
+                        </button>
+                        <button class="btn btn-outline-success btn-sm quick-adjust" data-value="5">
+                            <i class="fas fa-plus"></i> +5
+                        </button>
+                        <button class="btn btn-outline-success btn-sm quick-adjust" data-value="10">
+                            <i class="fas fa-plus"></i> +10
+                        </button>
+                        <hr>
+                        <button class="btn btn-outline-danger btn-sm quick-adjust" data-value="-1">
+                            <i class="fas fa-minus"></i> -1
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm quick-adjust" data-value="-5">
+                            <i class="fas fa-minus"></i> -5
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm quick-adjust" data-value="-10">
+                            <i class="fas fa-minus"></i> -10
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Movements -->
+            <div class="card">
+                <div class="card-header">
+                    <h6>Recent Movements</h6>
+                </div>
+                <div class="card-body">
+                    {% for movement in product.stockmovement_set.all|slice:":5" %}
+                    <div class="movement-item mb-2 pb-2 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <small class="{% if movement.movement_type == 'IN' %}text-success{% else %}text-danger{% endif %}">
+                                <i class="fas {% if movement.movement_type == 'IN' %}fa-plus{% else %}fa-minus{% endif %}"></i>
+                                {{ movement.movement_type }} {{ movement.quantity }}
+                            </small>
+                            <small class="text-muted">{{ movement.date|date:"M d" }}</small>
+                        </div>
+                        {% if movement.reason %}
+                        <small class="text-muted">{{ movement.reason }}</small>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <small class="text-muted">No recent movements</small>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const adjustmentInput = document.getElementById('{{ form.adjustment.id_for_label }}');
+    const newStockSpan = document.getElementById('new-stock');
+    const movementPreview = document.getElementById('movement-preview');
+    const currentStock = {{ product.stock_quantity }};
+
+    function updatePreview() {
+        const adjustment = parseInt(adjustmentInput.value) || 0;
+        const newStock = currentStock + adjustment;
+        newStockSpan.textContent = newStock;
+
+        if (adjustment > 0) {
+            movementPreview.textContent = `Adding ${adjustment} units to stock`;
+        } else if (adjustment < 0) {
+            movementPreview.textContent = `Reducing stock by ${Math.abs(adjustment)} units`;
+        } else {
+            movementPreview.textContent = 'No change';
+        }
+    }
+
+    adjustmentInput.addEventListener('input', updatePreview);
+
+    // Quick adjustment buttons
+    document.querySelectorAll('.quick-adjust').forEach(button => {
+        button.addEventListener('click', function() {
+            const value = parseInt(this.dataset.value);
+            const current = parseInt(adjustmentInput.value) || 0;
+            adjustmentInput.value = current + value;
+            updatePreview();
+        });
+    });
+
+    // Initialize preview
+    updatePreview();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Inventory{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>{{ product.name }}</h1>
+            <a href="{% url 'inventory:inventory_list' %}" class="btn btn-back">Back to Inventory</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card inventory-card">
+                <div class="card-header inventory-card-header">
+                    <h5>Product Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>SKU:</strong> {{ product.sku }}</p>
+                    <p><strong>Category:</strong> {{ product.category.name|default:"N/A" }}</p>
+                    <p><strong>Supplier:</strong> {{ product.supplier.name|default:"N/A" }}</p>
+                    <p><strong>Description:</strong> {{ product.description|default:"No description" }}</p>
+                    <p><strong>Price:</strong> {{ product.price }}</p>
+                    <p><strong>Stock Quantity:</strong> {{ product.stock_quantity }}</p>
+                    <p><strong>Reorder Level:</strong> {{ product.reorder_level }}</p>
+                    <p><strong>Status:</strong>
+                        {% if product.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                        {% endif %}
+                    </p>
+                    {% if product.image %}
+                    <div class="mt-3">
+                        <label class="fw-bold mb-2">Product Image:</label>
+                        <div class="p-2 border rounded bg-light text-center">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 300px;">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card inventory-card">
+                <div class="card-header inventory-card-header">
+                    <h5>Recent Stock Movements</h5>
+                </div>
+                <div class="card-body">
+                    {% if movements %}
+                    <ul class="list-group inventory-list">
+                        {% for movement in movements %}
+                        <li class="list-group-item">
+                            <strong>{{ movement.movement_type }}</strong> {{ movement.quantity }}
+                            {% if movement.reason %} - {{ movement.reason }}{% endif %}
+                            <small class="text-muted">{{ movement.date|date:"M d, Y H:i" }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">No stock movements recorded.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

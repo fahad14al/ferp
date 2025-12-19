@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invoices - Sales{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Sales Invoices</h1>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Invoice #</th>
+                            <th>Order Ref</th>
+                            <th>Date Issued</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td><strong>{{ invoice.invoice_number }}</strong></td>
+                            <td>
+                                <a href="{% url 'sales:sales_order_detail' invoice.sales_order.pk %}">{{ invoice.sales_order.order_number }}</a>
+                            </td>
+                            <td>{{ invoice.date_issued|date:"M d, Y" }}</td>
+                            <td>{{ invoice.sales_order.customer.name }}</td>
+                            <td>
+                                <span class="badge 
+                                    {% if invoice.status == 'paid' %}bg-success
+                                    {% elif invoice.status == 'issued' %}bg-primary
+                                    {% elif invoice.status == 'overdue' %}bg-danger
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ invoice.amount_due }}</td>
+                            <td>
+                                <a href="{% url 'sales:invoice_detail' invoice.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-file-invoice"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">No invoices found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

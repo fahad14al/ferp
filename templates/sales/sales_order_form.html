@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static crispy_forms_tags %}
+
+{% block title %}{{ title }} - Sales{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/sales.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="sales-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>{{ title }}</h1>
+            <a href="{% url 'sales:sales_order_list' %}" class="btn btn-back">Back to Orders</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card sales-card">
+        <div class="card-body">
+            <form method="post" class="sales-form">
+                {% csrf_token %}
+                {{ form|crispy }}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

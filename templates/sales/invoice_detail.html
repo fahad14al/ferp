@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invoice {{ invoice.invoice_number }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .invoice-box {
+        max-width: 800px;
+        margin: auto;
+        padding: 30px;
+        border: 1px solid #eee;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+        background: white;
+    }
+    
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+    }
+    
+    .invoice-title {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .invoice-meta {
+        text-align: right;
+    }
+    
+    .invoice-to {
+        margin-bottom: 30px;
+    }
+    
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+    
+    .invoice-table th {
+        background: #f8f9fa;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .invoice-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .invoice-total {
+        text-align: right;
+        margin-top: 20px;
+        font-size: 18px;
+    }
+    
+    .invoice-total tr td {
+        border: none;
+        padding: 5px 12px;
+    }
+    
+    .total-line {
+        font-weight: bold;
+        font-size: 20px;
+        border-top: 2px solid #333 !important;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .invoice-box, .invoice-box * {
+            visibility: visible;
+        }
+        .invoice-box {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none;
+            box-shadow: none;
+        }
+        .no-print {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3 no-print">
+        <a href="{% url 'sales:invoice_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Invoices
+        </a>
+        <button onclick="window.print()" class="btn btn-primary float-end">
+            <i class="fas fa-print"></i> Print Invoice
+        </button>
+    </div>
+
+    <div class="invoice-box">
+        <div class="invoice-header">
+            <div>
+                <div class="invoice-title">INVOICE</div>
+                <div class="text-muted">#{{ invoice.invoice_number }}</div>
+                <div class="mt-2 text-success fw-bold">{{ invoice.get_status_display|upper }}</div>
+            </div>
+            <div class="invoice-meta">
+                <h5>{{ company_name }}</h5>
+                <div>Date Issued: {{ invoice.date_issued|date:"M d, Y" }}</div>
+                {% if invoice.due_date %}
+                <div>Due Date: {{ invoice.due_date|date:"M d, Y" }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-6">
+                <div class="invoice-to">
+                    <strong>Bill To:</strong><br>
+                    {{ sales_order.customer.name }}<br>
+                    {{ sales_order.customer.phone }}<br>
+                    {{ sales_order.customer.address|linebreaksbr }}
+                </div>
+            </div>
+        </div>
+
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="text-center">Quantity</th>
+                    <th class="text-end">Unit Price</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in sales_order.items.all %}
+                <tr>
+                    <td>{{ item.product.name }}<br><small class="text-muted">{{ item.product.sku }}</small></td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.unit_price }}</td>
+                    <td>{{ item.line_total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="row justify-content-end">
+            <div class="col-md-5">
+                <table class="table table-borderless invoice-total">
+                    <tr>
+                        <td>Subtotal:</td>
+                        <td>{{ sales_order.subtotal }}</td>
+                    </tr>
+                    <tr>
+                        <td>Discount:</td>
+                        <td>-{{ sales_order.discount_amount }}</td>
+                    </tr>
+                    <tr>
+                        <td>Tax:</td>
+                        <td>{{ sales_order.tax_amount }}</td>
+                    </tr>
+                    <tr class="total-line">
+                        <td>Total:</td>
+                        <td>${{ invoice.amount_due }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        {% if invoice.notes %}
+        <div class="mt-4 pt-4 border-top">
+            <strong>Notes:</strong>
+            <p class="text-muted">{{ invoice.notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

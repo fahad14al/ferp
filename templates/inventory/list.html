@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventory Management - ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        --secondary-gradient: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .page-header {
+        background: white;
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+    
+    .header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+    
+    .header-breadcrumb {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        height: 100%;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .modern-table th {
+        background: #f8fafc;
+        padding: 1rem;
+        font-weight: 600;
+        color: #475569;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .modern-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+    .modern-table tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    .product-icon {
+        width: 40px;
+        height: 40px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .badge-modern {
+        padding: 0.35em 0.8em;
+        border-radius: 6px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+
+    .filter-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* Mobile Card View */
+    .mobile-product-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .btn-gradient-primary {
+        background: var(--primary-gradient);
+        border: none;
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        transition: all 0.2s;
+    }
+
+    .btn-gradient-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(79, 70, 229, 0.3);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="header-title">Inventory Management</h1>
+            <div class="header-breadcrumb">
+                Dashboard &bull; Products &bull; List
+            </div>
+        </div>
+        <a href="{% url 'inventory:product_create' %}" class="btn btn-gradient-primary">
+            <i class="fas fa-plus me-2"></i>Add Product
+        </a>
+    </div>
+</div>
+
+<div class="container-fluid px-4 pb-5">
+    {% if low_stock_count > 0 %}
+    <div class="alert alert-warning border-0 shadow-sm rounded-3 mb-4 d-flex align-items-center" role="alert" style="background-color: #fffbeb; border-left: 4px solid #f59e0b !important;">
+        <i class="fas fa-exclamation-triangle text-warning me-3 fa-lg"></i>
+        <div class="flex-grow-1">
+            <strong class="text-warning-dark">Low Stock Alert!</strong> 
+            {{ low_stock_count }} product(s) are below their reorder level.
+        </div>
+        <a href="?stock_status=low" class="btn btn-sm btn-warning text-white">View Items</a>
+        <button type="button" class="btn-close ms-3" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Filters -->
+    <div class="filter-card p-4 mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold text-uppercase">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                    <input type="text" class="form-control border-start-0 ps-0 bg-light" id="search" name="search"
+                           value="{{ search_query }}" placeholder="Product name, SKU...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-bold text-uppercase">Category</label>
+                <select class="form-select bg-light" name="category">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-bold text-uppercase">Supplier</label>
+                <select class="form-select bg-light" name="supplier">
+                    <option value="">All Suppliers</option>
+                    {% for supplier in suppliers %}
+                    <option value="{{ supplier.id }}" {% if selected_supplier == supplier.id|stringformat:"s" %}selected{% endif %}>
+                        {{ supplier.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-bold text-uppercase">Status</label>
+                <select class="form-select bg-light" name="stock_status">
+                    <option value="">All Status</option>
+                    <option value="low" {% if selected_stock_status == 'low' %}selected{% endif %}>Low Stock</option>
+                    <option value="out" {% if selected_stock_status == 'out' %}selected{% endif %}>Out of Stock</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+                <a href="{% url 'inventory:inventory_list' %}" class="btn btn-light" title="Clear Filters">
+                    <i class="fas fa-undo"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive d-none d-lg-block">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Product Info</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in page_obj %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="product-icon me-3">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                        {% else %}
+                                            {{ product.name|slice:":2"|upper }}
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ product.name }}</div>
+                                        <div class="small text-muted">{{ product.supplier.name|default:"No Supplier" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code class="text-primary bg-light px-2 py-1 rounded">{{ product.sku }}</code></td>
+                            <td>
+                                {% if product.category %}
+                                <span class="badge bg-light text-dark border">{{ product.category.name }}</span>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold {% if product.stock_quantity == 0 %}text-danger{% elif product.is_low_stock %}text-warning{% else %}text-success{% endif %}">
+                                        {{ product.stock_quantity }} units
+                                    </span>
+                                    <span class="small text-muted">Reorder: {{ product.reorder_level }}</span>
+                                </div>
+                            </td>
+                            <td class="fw-bold">{{ product.price|floatformat:2 }}</td>
+                            <td>
+                                {% if product.is_active %}
+                                <span class="badge-modern bg-success-subtle text-success">Active</span>
+                                {% else %}
+                                <span class="badge-modern bg-secondary-subtle text-secondary">Inactive</span>
+                                {% endif %}
+                                
+                                {% if product.is_low_stock %}
+                                <span class="badge-modern bg-warning-subtle text-warning ms-1">Low</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a href="{% url 'inventory:product_detail' product.pk %}" class="btn btn-sm btn-light border" title="View">
+                                        <i class="fas fa-eye text-primary"></i>
+                                    </a>
+                                    <a href="{% url 'inventory:product_update' product.pk %}" class="btn btn-sm btn-light border" title="Edit">
+                                        <i class="fas fa-edit text-secondary"></i>
+                                    </a>
+                                    <a href="{% url 'inventory:stock_adjustment' product.pk %}" class="btn btn-sm btn-light border" title="Adjust Stock">
+                                        <i class="fas fa-boxes text-warning"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-box-open fa-3x mb-3 opacity-50"></i>
+                                    <h5>No products found</h5>
+                                    <p class="mb-0">Try adjusting search filters or add a new product</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile View -->
+            <div class="d-block d-lg-none bg-light p-3">
+                {% for product in page_obj %}
+                <div class="mobile-product-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="product-icon me-3" style="width:48px; height:48px;">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                                {% else %}
+                                    {{ product.name|slice:":2"|upper }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ product.name }}</div>
+                                <div class="small text-muted">{{ product.sku }}</div>
+                            </div>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'inventory:product_detail' product.pk %}">View Details</a></li>
+                                <li><a class="dropdown-item" href="{% url 'inventory:product_update' product.pk %}">Edit Product</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'inventory:stock_adjustment' product.pk %}">Stock Adjustment</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="small text-muted uppercase">Stock</div>
+                            <div class="fw-bold {% if product.stock_quantity == 0 %}text-danger{% elif product.is_low_stock %}text-warning{% else %}text-success{% endif %}">
+                                {{ product.stock_quantity }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="small text-muted uppercase">Price</div>
+                            <div class="fw-bold">{{ product.price|floatformat:2 }}</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="small text-muted">{{ product.category.name|default:"uncategorized" }}</div>
+                        <div>
+                            {% if product.is_low_stock %}
+                                <span class="badge bg-warning text-dark">Low Stock</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x text-muted mb-3 opacity-50"></i>
+                    <p class="text-muted">No products found matching criteria</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="card-footer bg-white border-top p-3">
+                <nav>
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded-circle mx-1" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <li class="page-item disabled">
+                            <span class="page-link border-0">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link border-0 rounded-circle mx-1" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

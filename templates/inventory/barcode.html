@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Barcode - {{ product.name }} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/inventory.css' %}">
+<style>
+.barcode-container {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.barcode-display {
+    font-family: 'Courier New', monospace;
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    padding: 1rem;
+    border: 2px solid #333;
+    background: #f8f9fa;
+    margin: 1rem 0;
+    border-radius: 5px;
+}
+
+.barcode-info {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.barcode-actions {
+    margin-top: 2rem;
+}
+
+.barcode-actions .btn {
+    margin: 0 0.5rem 0.5rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="inventory-header">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1>Product Barcode</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_dashboard' %}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:inventory_list' %}">Products</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'inventory:product_detail' product.pk %}">{{ product.name }}</a></li>
+                        <li class="breadcrumb-item active">Barcode</li>
+                    </ol>
+                </nav>
+            </div>
+            <a href="{% url 'inventory:product_detail' product.pk %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Product
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="barcode-container">
+                <h3 class="mb-4">{{ product.name }}</h3>
+
+                <!-- Barcode Display -->
+                <div class="barcode-display" id="barcode-text">
+                    {{ barcode_data }}
+                </div>
+
+                <!-- Barcode Visual (Simple representation) -->
+                <div class="barcode-visual mb-4">
+                    <svg id="barcode-svg" width="300" height="100" style="border: 1px solid #ddd;"></svg>
+                </div>
+
+                <!-- Product Information -->
+                <div class="barcode-info">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>SKU:</strong> {{ product.sku }}<br>
+                            <strong>Price:</strong> {{ product.price|floatformat:2 }}<br>
+                            <strong>Stock:</strong> {{ product.stock_quantity }} units
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Category:</strong> {{ product.category.name|default:"N/A" }}<br>
+                            <strong>Supplier:</strong> {{ product.supplier.name|default:"N/A" }}<br>
+                            <strong>Status:</strong>
+                            {% if product.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="barcode-actions">
+                    <button onclick="printBarcode()" class="btn btn-primary">
+                        <i class="fas fa-print"></i> Print Barcode
+                    </button>
+                    <button onclick="copyToClipboard()" class="btn btn-secondary">
+                        <i class="fas fa-copy"></i> Copy SKU
+                    </button>
+                    <button onclick="regenerateBarcode()" class="btn btn-warning">
+                        <i class="fas fa-sync"></i> Regenerate
+                    </button>
+                    <a href="{% url 'inventory:generate_barcode' product.pk %}?format=png" class="btn btn-success">
+                        <i class="fas fa-download"></i> Download PNG
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Instructions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Barcode Usage</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Point of Sale</h6>
+                            <ul>
+                                <li>Scan barcode during checkout</li>
+                                <li>Quick product lookup</li>
+                                <li>Inventory verification</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Inventory Management</h6>
+                            <ul>
+                                <li>Stock taking</li>
+                                <li>Receiving goods</li>
+                                <li>Product identification</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple barcode generation (Code 128-like representation)
+function generateBarcode(text) {
+    // This is a simplified barcode representation
+    // In production, you'd use a proper barcode library like JsBarcode
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 300;
+    canvas.height = 100;
+
+    // Clear canvas
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Draw barcode bars (simplified)
+    ctx.fillStyle = 'black';
+    const barWidth = canvas.width / (text.length * 8);
+
+    for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        for (let j = 0; j < 8; j++) {
+            if (charCode & (1 << j)) {
+                ctx.fillRect(i * 8 * barWidth + j * barWidth, 10, barWidth, 60);
+            }
+        }
+    }
+
+    // Add text below
+    ctx.fillStyle = 'black';
+    ctx.font = '12px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, canvas.width / 2, 85);
+
+    return canvas.toDataURL();
+}
+
+function printBarcode() {
+    window.print();
+}
+
+function copyToClipboard() {
+    const barcodeText = document.getElementById('barcode-text').textContent.trim();
+    navigator.clipboard.writeText(barcodeText).then(function() {
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-secondary');
+
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-secondary');
+        }, 2000);
+    });
+}
+
+function regenerateBarcode() {
+    // In a real implementation, this would regenerate the barcode
+    alert('Barcode regeneration feature would be implemented here.');
+}
+
+// Generate barcode on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const barcodeText = document.getElementById('barcode-text').textContent.trim();
+    const barcodeSvg = document.getElementById('barcode-svg');
+
+    // Simple barcode representation
+    barcodeSvg.innerHTML = `
+        <defs>
+            <pattern id="barcode-pattern" patternUnits="userSpaceOnUse" width="10" height="50">
+                <rect width="2" height="50" fill="black"/>
+                <rect x="3" width="1" height="50" fill="white"/>
+                <rect x="5" width="2" height="50" fill="black"/>
+                <rect x="8" width="1" height="50" fill="white"/>
+            </pattern>
+        </defs>
+        <rect width="300" height="50" fill="url(#barcode-pattern)"/>
+        <text x="150" y="75" text-anchor="middle" font-family="Arial" font-size="12">${barcodeText}</text>
+    `;
+});
+</script>
+
+<style media="print">
+@page {
+    size: A4;
+    margin: 1cm;
+}
+
+body * {
+    visibility: hidden;
+}
+
+.barcode-container {
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+}
+
+.barcode-actions {
+    display: none !important;
+}
+</style>
+{% endblock %}

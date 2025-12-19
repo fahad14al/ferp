@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Financial Summary Report{% endblock %}
+
+{% block extra_css %}
+<style>
+    .financial-card {
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    .financial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    .balance-positive { color: #1cc88a; font-weight: bold; }
+    .balance-negative { color: #e74a3b; font-weight: bold; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">{{ report_title }}</h1>
+            <p class="text-muted">Period: {{ start_date }} to {{ end_date }}</p>
+        </div>
+    </div>
+
+    <!-- Income Statement -->
+    <div class="row mb-4">
+        <div class="col-lg-6 mb-4">
+            <div class="card financial-card shadow h-100">
+                <div class="card-header py-3 bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Income Statement</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <td><strong>Revenue:</strong></td>
+                                <td class="text-end balance-positive">{{ total_revenue|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Expenses:</strong></td>
+                                <td class="text-end balance-negative">{{ total_expenses|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="table-active">
+                                <td><strong>Net Income:</strong></td>
+                                <td class="text-end {% if net_income >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+                                    <strong>{{ net_income|floatformat:2 }}</strong>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="mt-3">
+                        <h6>Revenue vs Expenses</h6>
+                        <div class="progress" style="height: 30px;">
+                            {% widthratio total_revenue total_revenue|add:total_expenses 100 as revenue_percent %}
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ revenue_percent }}%">
+                                Revenue: {{ total_revenue|floatformat:0 }}
+                            </div>
+                            <div class="progress-bar bg-danger" role="progressbar" 
+                                 style="width: {% widthratio total_expenses total_revenue|add:total_expenses 100 %}%">
+                                Expenses: {{ total_expenses|floatformat:0 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Sheet -->
+        <div class="col-lg-6 mb-4">
+            <div class="card financial-card shadow h-100">
+                <div class="card-header py-3 bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">Balance Sheet</h6>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-primary">Assets</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td>Total Assets:</td>
+                            <td class="text-end"><strong>{{ total_assets|floatformat:2 }}</strong></td>
+                        </tr>
+                    </table>
+                    
+                    <hr>
+                    
+                    <h6 class="text-warning">Liabilities</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td>Total Liabilities:</td>
+                            <td class="text-end"><strong>{{ total_liabilities|floatformat:2 }}</strong></td>
+                        </tr>
+                    </table>
+                    
+                    <hr>
+                    
+                    <h6 class="text-info">Equity</h6>
+                    <table class="table table-sm table-borderless">
+                        <tr>
+                            <td>Total Equity:</td>
+                            <td class="text-end"><strong>{{ total_equity|floatformat:2 }}</strong></td>
+                        </tr>
+                    </table>
+                    
+                    <div class="alert alert-info mt-3">
+                        <small><strong>Accounting Equation:</strong><br>
+                        Assets = Liabilities + Equity<br>
+                        {{ total_assets|floatformat:2 }} = {{ total_liabilities|floatformat:2 }} + {{ total_equity|floatformat:2 }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Metrics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Key Financial Metrics</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <div class="text-muted small">Profit Margin</div>
+                                <div class="h4 {% if net_income >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    {% if total_revenue > 0 %}
+                                        {% widthratio net_income total_revenue 100 %}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <div class="text-muted small">Current Ratio</div>
+                                <div class="h4 text-primary">
+                                    {% if total_liabilities > 0 %}
+                                        {% widthratio total_assets total_liabilities 1 %}:1
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <div class="text-muted small">Debt-to-Equity</div>
+                                <div class="h4 text-warning">
+                                    {% if total_equity > 0 %}
+                                        {% widthratio total_liabilities total_equity 1 %}:1
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <div class="text-muted small">ROE</div>
+                                <div class="h4 text-info">
+                                    {% if total_equity > 0 %}
+                                        {% widthratio net_income total_equity 100 %}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+     <div class="signup-container">
+        <div class="signup-wrapper">
+            <!-- Left Column - Branding & Info -->
+            <div class="signup-left">
+                <div class="brand-logo">
+                    <i class="fas fa-cube"></i>
+                    <h1>FERP</h1>
+                </div>
+                
+                <div class="signup-info">
+                    <h2>Join Our Community</h2>
+                    <p>Create an account to unlock exclusive features and connect with professionals worldwide.</p>
+                    
+                    <div class="features-list">
+                        <div class="feature">
+                            <i class="fas fa-shield-alt"></i>
+                            <div>
+                                <h4>Secure & Private</h4>
+                                <p>Your data is protected with industry-standard encryption</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="fas fa-bolt"></i>
+                            <div>
+                                <h4>Fast Setup</h4>
+                                <p>Get started in less than 2 minutes</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="fas fa-headset"></i>
+                            <div>
+                                <h4>24/7 Support</h4>
+                                <p>Our team is always ready to help you</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="signup-footer">
+                    <p>Already have an account? <a href="{% url 'account:login' %}" class="login-link">Sign In</a></p>
+                </div>
+            </div>
+            
+            <!-- Right Column - Signup Form -->
+            <div class="signup-right">
+                <div class="form-header">
+                    <h2>Create Your Account</h2>
+                    <p>Fill in your details to get started</p>
+                </div>
+                
+                <form method="POST" class="signup-form" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}">
+                                {{ form.first_name.label }}
+                                {% if form.first_name.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                {{ form.first_name }}
+                            </div>
+                            {% if form.first_name.errors %}
+                            <div class="error-message">
+                                {% for error in form.first_name.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.first_name.help_text %}
+                            <small class="help-text">{{ form.first_name.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}">
+                                {{ form.last_name.label }}
+                                {% if form.last_name.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user"></i>
+                                {{ form.last_name }}
+                            </div>
+                            {% if form.last_name.errors %}
+                            <div class="error-message">
+                                {% for error in form.last_name.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.last_name.help_text %}
+                            <small class="help-text">{{ form.last_name.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">
+                            Username
+                            {% if form.username.field.required %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-at"></i>
+                            {{ form.username }}
+                        </div>
+                        {% if form.username.errors %}
+                        <div class="error-message">
+                            {% for error in form.username.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if form.username.help_text %}
+                        <small class="help-text">{{ form.username.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">
+                            {{ form.email.label }}
+                            {% if form.email.field.required %}<span class="required">*</span>{% endif %}
+                        </label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope"></i>
+                            {{ form.email }}
+                        </div>
+                        {% if form.email.errors %}
+                        <div class="error-message">
+                            {% for error in form.email.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        {% if form.email.help_text %}
+                        <small class="help-text">{{ form.email.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.password1.id_for_label }}">
+                                Password
+                                {% if form.password1.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            <div class="input-with-icon password-field">
+                                <i class="fas fa-lock"></i>
+                                {{ form.password1 }}
+                                <button type="button" class="toggle-password" data-target="password1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password1.errors %}
+                            <div class="error-message">
+                                {% for error in form.password1.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.password1.help_text %}
+                            <small class="help-text">{{ form.password1.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.password2.id_for_label }}">
+                                Confirm Password
+                                {% if form.password2.field.required %}<span class="required">*</span>{% endif %}
+                            </label>
+                            <div class="input-with-icon password-field">
+                                <i class="fas fa-lock"></i>
+                                {{ form.password2 }}
+                                <button type="button" class="toggle-password" data-target="password2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password2.errors %}
+                            <div class="error-message">
+                                {% for error in form.password2.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if form.password2.help_text %}
+                            <small class="help-text">{{ form.password2.help_text }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group terms-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="terms" name="terms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#" class="terms-link">Terms of Service</a> and <a href="#" class="terms-link">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn-signup">
+                        <i class="fas fa-user-plus"></i>
+                        Create Account
+                    </button>
+                    
+                    <div class="divider">
+                        <span>Or sign up with</span>
+                    </div>
+                    
+                    <div class="social-signup">
+                        <button type="button" class="btn-social google">
+                            <i class="fab fa-google"></i>
+                            Google
+                        </button>
+                        <button type="button" class="btn-social github">
+                            <i class="fab fa-github"></i>
+                            GitHub
+                        </button>
+                        <button type="button" class="btn-social linkedin">
+                            <i class="fab fa-linkedin"></i>
+                            LinkedIn
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="form-footer">
+                    <p>By signing up, you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a></p>
+                    <p>Already have an account? <a href="{% url 'account:login' %}">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
