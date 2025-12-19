@@ -1,3 +1,7 @@
+This is the webapp link : https://fahadalmohammad.pythonanywhere.com/account/login/
+username : fahadalmohammad50
+password : mynamefahad
+
 # FERP - Full Enterprise Resource Planning
 
 FERP is a modern, lightweight Enterprise Resource Planning system built with Django.
